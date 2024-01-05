@@ -28,13 +28,19 @@
       <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
     </ul>
   </div>
+  <PaginationComponent />
 </template>
 
 <script>
+import PaginationComponent from './PaginationComponent.vue';
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  components: {
+    PaginationComponent 
   }
 }
 </script>
