@@ -1,5 +1,6 @@
 <script setup>
     import { onMounted, reactive } from 'vue';
+    import NavPagesComponent from './NavPagesComponent.vue';
 
     const data = reactive({
         collumns: Array,
@@ -58,43 +59,16 @@
         }
     }
 
-    const loadAmount = (event) => {
+    const pagesTotal = () =>  data.rows.length / data.amount[document.querySelector('.form-select').selectedIndex];
 
-        let page = data.pages.filter(p => p.selected)[0];
-
-        let amount = data.amount[event.target.selectedIndex];
-
-        let currentPage = amount * (page.content - 1);
-
-        let start = currentPage;
-
-        let end = amount + currentPage;
-
-        paginate(start, end);
-    };
+    const amount = () => data.amount[document.querySelector('.form-select').selectedIndex];
 
     onMounted(() => {
 
         data.pages = [];
 
-        for(let i = 0; i < pagesTotal(); i++) {
-    
-            if(i == 0) {
-                data.pages.push({content: i + 1, selected: true});
-                continue;
-            }
-
-            if(i > 5)
-                break;
-    
-            if(i > 3) {
-                data.pages.push({content:'.', selected: false});
-                continue;
-            }
-
-            data.pages.push({content:i + 1, selected: false});
-        }
-
+        for(let i = 0; i < pagesTotal(); i++)
+            data.pages.push({content: i + 1});
 
         paginate(0, 10);
     });
@@ -117,50 +91,22 @@
         .slice(data.page, data.amount[document.querySelector('.form-select').selectedIndex]);
     }
 
-    const pagesTotal = () => data.rows.length / data.amount[document.querySelector('.form-select').selectedIndex];
-
-    const selectPage = page => {
-
-        data.pages.forEach(page => page.selected = false);
-
-        page.selected = true
-
-        let amount = data.amount[document.querySelector('.form-select').selectedIndex];
-
-        let currentPage = amount * (page.content - 1);
-
-        let start = currentPage;
-
-        let end = amount + currentPage;
-
-        paginate(start, end);
-
-        resolveOthers(page)
-    };
-
-    const resolveOthers = (currentPage) => {
-
-        for(let i = (currentPage.content - 1); i < pagesTotal(); i++) {
-
-            if(i == (currentPage.content - 1)) {
-                data.pages.push({content: '.', selected: true});
-                continue;
-            }
-
-            if(i > (currentPage.content + 5)) break;
-
-            if(i > (currentPage.content + 3)) {
-                data.pages.push({content:'.', selected: false});
-                continue;
-            }
-
-            data.pages.push({content:i, selected: false});
-        }
-    };
-
     const paginate = (start, end) => data.dynamicRows = data
         .rows
         .slice(start, end);
+
+    
+    const loadAmount = event => {
+
+        let amount = data.amount[event.target.selectedIndex];
+        
+        data.pages = [];
+
+        for(let i = 0; i < pagesTotal(); i++)
+            data.pages.push({content: i + 1});
+
+        paginate(0, amount);
+    }
 
 </script>
 
@@ -238,24 +184,14 @@
                     </tbody>
                 </table>
 
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center" >
-                        <li class="page-item disabled">
-                            <span class="page-link" tabindex="-1" aria-disabled="true">Previous</span>
-                        </li>
-
-                        <li v-for="page in data.pages_btn" :key="page.content" class="page-item" >
-                            <span :class="page.selected ? 'page-link active' : 'page-link' " @click="selectPage(page)" >{{ page.content }}</span>
-                        </li>
-                        <li class="page-item">
-                            <span class="page-link" >Next</span>
-                        </li>
-                    </ul>
-                </nav>
-
+               <NavPagesComponent
+                    :pages="data.pages"
+                    :paginate="paginate"
+                    :pagesTotal="pagesTotal"
+                    :amount="amount"
+               />
             </div>
         </div>
-
     </div>
 </template>
 
